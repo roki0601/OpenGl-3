@@ -3,7 +3,6 @@
 
 #include "math_3d.h"
 
-
 /*Это объявление класса камеры. Он хранит 3 свойства, которые характеризуют камеру - позиция, направление и верхний вектор.*/
 class Camera
 {
@@ -48,11 +47,6 @@ private:
 
     float m_AngleH;
     float m_AngleV;
-
-    bool m_OnUpperEdge;
-    bool m_OnLowerEdge;
-    bool m_OnLeftEdge;
-    bool m_OnRightEdge;
 
     Vector2i m_mousePos;
 };

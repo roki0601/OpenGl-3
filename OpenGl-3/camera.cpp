@@ -17,7 +17,6 @@ Camera::Camera(int WindowWidth, int WindowHeight)
     Init();
 }
 
-
 /* онструктор камеры теперь принимает размеры окна. Ќам это потребуетс€ дл€ перемещени€ курсора в центр экрана.*/
 Camera::Camera(int WindowWidth, int WindowHeight, const Vector3f& Pos, const Vector3f& Target, const Vector3f& Up)
 {
@@ -33,7 +32,6 @@ Camera::Camera(int WindowWidth, int WindowHeight, const Vector3f& Pos, const Vec
 
     Init();
 }
-
 
 /*¬ функции Init() мы начинаем с вычислени€ горизонтального угла. ћы создаем новый вектор,
   названый HTarget (направление по горизонтали), который €вл€етс€ проекцией исходного вектора направлени€ на плоскость XZ.
@@ -70,16 +68,11 @@ void Camera::Init()
 
     m_AngleV = -ToDegree(asin(m_target.y));
 
-    m_OnUpperEdge = false;
-    m_OnLowerEdge = false;
-    m_OnLeftEdge = false;
-    m_OnRightEdge = false;
     m_mousePos.x = m_windowWidth / 2;
     m_mousePos.y = m_windowHeight / 2;
 
     glutWarpPointer(m_mousePos.x, m_mousePos.y);
 }
-
 
 /*Ёта функци€ двигает камеру согласно событи€м клавиатуры*/
 bool Camera::OnKeyboard(int Key)
@@ -126,48 +119,21 @@ bool Camera::OnKeyboard(int Key)
     return Ret;
 }
 
-
 /*Ёта функци€ используетс€ что бы сообщить камере, что положение мыши изменилось.*/
 void Camera::OnMouse(int x, int y)
 {
     const int DeltaX = x - m_mousePos.x;
     const int DeltaY = y - m_mousePos.y;
 
-    m_mousePos.x = x;
-    m_mousePos.y = y;
+    if ((DeltaX == 0) && (DeltaY == 0)) return;
 
     m_AngleH += (float)DeltaX / 20.0f;
     m_AngleV += (float)DeltaY / 20.0f;
 
-    if (DeltaX == 0) {
-        if (x <= MARGIN) {
-            //    m_AngleH -= 1.0f;
-            m_OnLeftEdge = true;
-        }
-        else if (x >= (m_windowWidth - MARGIN)) {
-            //    m_AngleH += 1.0f;
-            m_OnRightEdge = true;
-        }
-    }
-    else {
-        m_OnLeftEdge = false;
-        m_OnRightEdge = false;
-    }
 
-    if (DeltaY == 0) {
-        if (y <= MARGIN) {
-            m_OnUpperEdge = true;
-        }
-        else if (y >= (m_windowHeight - MARGIN)) {
-            m_OnLowerEdge = true;
-        }
-    }
-    else {
-        m_OnUpperEdge = false;
-        m_OnLowerEdge = false;
-    }
 
     Update();
+    glutWarpPointer(m_windowWidth / 2, m_windowHeight / 2);
 }
 
 
@@ -177,28 +143,6 @@ void Camera::OnMouse(int x, int y)
 void Camera::OnRender()
 {
     bool ShouldUpdate = false;
-
-    if (m_OnLeftEdge) {
-        m_AngleH -= 0.1f;
-        ShouldUpdate = true;
-    }
-    else if (m_OnRightEdge) {
-        m_AngleH += 0.1f;
-        ShouldUpdate = true;
-    }
-
-    if (m_OnUpperEdge) {
-        if (m_AngleV > -90.0f) {
-            m_AngleV -= 0.1f;
-            ShouldUpdate = true;
-        }
-    }
-    else if (m_OnLowerEdge) {
-        if (m_AngleV < 90.0f) {
-            m_AngleV += 0.1f;
-            ShouldUpdate = true;
-        }
-    }
 
     if (ShouldUpdate) {
         Update();
