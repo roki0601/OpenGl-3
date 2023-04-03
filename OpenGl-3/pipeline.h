@@ -3,7 +3,6 @@
 
 #include "math_3d.h"
 
-/*Этот класс конвейера абстрагирует детали получения всех преобразований, необходимых для одного объекта.*/
 class Pipeline
 {
 public:
@@ -51,7 +50,11 @@ public:
         m_camera.Up = Up;
     }
 
-    const Matrix4f* GetTrans();
+
+    const Matrix4f& GetWVPTrans();
+
+    const Matrix4f& GetWorldTrans();
+
 
 private:
     Vector3f m_scale;
@@ -72,7 +75,8 @@ private:
         Vector3f Up;
     } m_camera;
 
-    Matrix4f m_transformation;
+    Matrix4f m_WVPtransformation;
+    Matrix4f m_WorldTransformation;
 };
 
 
