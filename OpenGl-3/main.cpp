@@ -78,7 +78,6 @@ public:
         m_pEffect->Enable();
 
         m_pEffect->SetTextureUnit(0);
-
         Magick::InitializeMagick(nullptr); // <--- added this line
         m_pTexture = new Texture(GL_TEXTURE_2D, "C:\\Users\\Шамиль\\Downloads\\test.png");
 
@@ -111,6 +110,14 @@ public:
         const Matrix4f& WorldTransformation = p.GetWorldTrans();
         m_pEffect->SetWorldMatrix(WorldTransformation);
         m_pEffect->SetDirectionalLight(m_directionalLight);
+
+        /*В цикле рендера мы выхватываем позицию камеры (которая уже в мировом пространстве)
+          и передаем в экземпляр технологии света. Мы так же указываем интенсивность и сила отражения.
+          Все это подхватывается шейдером.*/
+
+        m_pEffect->SetEyeWorldPos(m_pGameCamera->GetPos());
+        m_pEffect->SetMatSpecularIntensity(1.0f);
+        m_pEffect->SetMatSpecularPower(32);
 
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
@@ -174,8 +181,6 @@ public:
 
 private:
 
-    /*Эта функция принимает массив индексов, получает вершины треугольников, полагаясь на них, и вычисляет нормали.*/
-
     void CalcNormals(const unsigned int* pIndices, unsigned int IndexCount,
         Vertex* pVertices, unsigned int VertexCount) {
         for (unsigned int i = 0; i < IndexCount; i += 3) {
@@ -236,7 +241,7 @@ int main(int argc, char** argv)
 {
     GLUTBackendInit(argc, argv);
 
-    if (!GLUTBackendCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, 32, false, "OpenGL tutors")) {
+    if (!GLUTBackendCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, 32, false, "Tutorial 19")) {
         return 1;
     }
 

@@ -4,10 +4,6 @@
 #include "technique.h"
 #include "math_3d.h"
 
-/*Это новая структура направленного света.
-  Появились 2 новых члена: направление в виде 3 вектора,
-  указываемое в мировом пространстве, и интенсивность как вещественное число.*/
-
 struct DirectionLight
 {
     Vector3f Color;
@@ -27,10 +23,19 @@ public:
     void SetTextureUnit(unsigned int TextureUnit);
     void SetDirectionalLight(const DirectionLight& Light);
 
+    void SetEyeWorldPos(const Vector3f& EyeWorldPos);
+    void SetMatSpecularIntensity(float Intensity);
+    void SetMatSpecularPower(float Power);
+
 private:
     GLuint m_WVPLocation;
     GLuint m_WorldMatrixLocation;
     GLuint m_samplerLocation;
+
+    GLuint m_eyeWorldPosition;
+    GLuint m_matSpecularIntensityLocation;
+    GLuint m_matSpecularPowerLocation;
+
     struct {
         GLuint Color;
         GLuint AmbientIntensity;
