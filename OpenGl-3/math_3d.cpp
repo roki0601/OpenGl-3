@@ -1,6 +1,5 @@
 #include "math_3d.h"
 
-/*метод для векторного умножения между 2 векторами*/
 Vector3f Vector3f::Cross(const Vector3f& v) const
 {
     const float _x = y * v.z - z * v.y;
@@ -10,7 +9,6 @@ Vector3f Vector3f::Cross(const Vector3f& v) const
     return Vector3f(_x, _y, _z);
 }
 
-/*делаем вектор единичной длины*/
 Vector3f& Vector3f::Normalize()
 {
     const float Length = sqrtf(x * x + y * y + z * z);
@@ -86,7 +84,6 @@ void Matrix4f::InitTranslationTransform(float x, float y, float z)
 }
 
 
-/*Эта функция генерирует преобразования камеры, которые позднее будут использованы конвейером*/
 void Matrix4f::InitCameraTransform(const Vector3f& Target, const Vector3f& Up)
 {
     Vector3f N = Target;

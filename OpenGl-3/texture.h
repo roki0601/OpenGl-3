@@ -6,7 +6,6 @@
 #include <GL/glew.h>
 #include <Magick++.h>
 
-/*Ѕольшинство указателей на текстуры инкапсулированы в следующем классе:*/
 class Texture
 {
 public:
@@ -25,4 +24,4 @@ private:
 };
 
 
-#endif TEXTURE_H
+#endif	/* TEXTURE_H */

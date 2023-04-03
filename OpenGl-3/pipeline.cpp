@@ -1,6 +1,6 @@
 #include "pipeline.h"
 
-/*Эта функции инициализирует три отдельные матрицы для преобразования с текущими параметрами.*/
+
 const Matrix4f* Pipeline::GetTrans()
 {
     Matrix4f ScaleTrans, RotateTrans, TranslationTrans, CameraTranslationTrans, CameraRotateTrans, PersProjTrans;

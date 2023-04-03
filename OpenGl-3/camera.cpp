@@ -17,7 +17,7 @@ Camera::Camera(int WindowWidth, int WindowHeight)
     Init();
 }
 
-/* онструктор камеры теперь принимает размеры окна. Ќам это потребуетс€ дл€ перемещени€ курсора в центр экрана.*/
+
 Camera::Camera(int WindowWidth, int WindowHeight, const Vector3f& Pos, const Vector3f& Target, const Vector3f& Up)
 {
     m_windowWidth = WindowWidth;
@@ -33,11 +33,7 @@ Camera::Camera(int WindowWidth, int WindowHeight, const Vector3f& Pos, const Vec
     Init();
 }
 
-/*¬ функции Init() мы начинаем с вычислени€ горизонтального угла. ћы создаем новый вектор,
-  названый HTarget (направление по горизонтали), который €вл€етс€ проекцией исходного вектора направлени€ на плоскость XZ.
-  «атем мы его нормируем (так как дл€ выводов выше требуетс€ единичный вектор на плоскости XZ).
-  «атем мы провер€ем какой кватернион соответствует вектору дл€ конечного подсчета значени€ координаты Z.
-  ƒалее мы подсчитываем вертикальный угол; сделать это гораздо проще.*/
+
 void Camera::Init()
 {
     Vector3f HTarget(m_target.x, 0.0, m_target.z);
@@ -74,7 +70,7 @@ void Camera::Init()
     glutWarpPointer(m_mousePos.x, m_mousePos.y);
 }
 
-/*Ёта функци€ двигает камеру согласно событи€м клавиатуры*/
+
 bool Camera::OnKeyboard(int Key)
 {
     bool Ret = false;
@@ -119,27 +115,22 @@ bool Camera::OnKeyboard(int Key)
     return Ret;
 }
 
-/*Ёта функци€ используетс€ что бы сообщить камере, что положение мыши изменилось.*/
+
 void Camera::OnMouse(int x, int y)
 {
+    if ((x == m_mousePos.x) && (y == m_mousePos.y)) return;
+
     const int DeltaX = x - m_mousePos.x;
     const int DeltaY = y - m_mousePos.y;
-
-    if ((DeltaX == 0) && (DeltaY == 0)) return;
 
     m_AngleH += (float)DeltaX / 20.0f;
     m_AngleV += (float)DeltaY / 20.0f;
 
-
-
     Update();
-    glutWarpPointer(m_windowWidth / 2, m_windowHeight / 2);
+    glutWarpPointer(m_mousePos.x, m_mousePos.y);
 }
 
 
-/*Ёта функци€ вызываетс€ из главного цикла рендера. ќна нам необходима дл€ случаев,
-  когда мышь не движетс€, но находитс€ около одной из границ экрана.
-  ¬ этом случае мышь не будет передавать событий, но мы все еще хотим, что бы камера вращалась*/
 void Camera::OnRender()
 {
     bool ShouldUpdate = false;
@@ -149,7 +140,6 @@ void Camera::OnRender()
     }
 }
 
-/*Ёта функци€ обновл€ет значени€ векторов направлени€ и вверх согласно горизонтальному и вертикальному углам.*/
 void Camera::Update()
 {
     const Vector3f Vaxis(0.0f, 1.0f, 0.0f);
