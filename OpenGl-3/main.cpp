@@ -8,33 +8,33 @@
 #include "pipeline.h"
 #include "camera.h"
 
-#define WINDOW_WIDTH 1024
+#define WINDOW_WIDTH  1024
 #define WINDOW_HEIGHT 768
 
 GLuint VBO; //переменная для хранения указателя на буфер вершин
 GLuint IBO; //указатель на буферный объект для буфера индексов
 GLuint gWVPLocation; //указатель для доступа к всемирной матрице
 
-Camera GameCamera; //создаём камеру
+Camera* pGameCamera = NULL; //указатель на камеру
 
 /*создадаём шейдерную программу*/
 static const char* pVS = "                                                          \n\
-#version 330                                                                        \n\
+#version 330 \n\
                                                                                     \n\
-layout (location = 0) in vec3 Position;                                             \n\
+layout (location = 0) in vec3 Position; \n\
                                                                                     \n\
-uniform mat4 gWVP;                                                                  \n\
+uniform mat4 gWVP; \n\
                                                                                     \n\
-out vec4 Color;                                                                     \n\
+out vec4 Color; \n\
                                                                                     \n\
-void main()                                                                         \n\
-{                                                                                   \n\
-    gl_Position = gWVP * vec4(Position, 1.0);                                       \n\
-    Color = vec4(clamp(Position, 0.0, 1.0), 1.0);                                   \n\
+void main() \n\
+{ \n\
+ gl_Position = gWVP * vec4(Position, 1.0); \n\
+ Color = vec4(clamp(Position, 0.0, 1.0), 1.0); \n\
 }";
 
 static const char* pFS = "                                                          \n\
-#version 330                                                                        \n\
+#version 330 \n\
                                                                                     \n\
 in vec4 Color;                                                                      \n\
                                                                                     \n\
@@ -45,8 +45,13 @@ void main()                                                                     
     FragColor = Color;                                                              \n\
 }";
 
+
+/*Где-то в функции рендера мы должны вызвать камеру.
+  Это дает ей шанс для действий, если мышь не двигалась, но находится около границы экрана.*/
 static void RenderSceneCB()
 {
+    pGameCamera->OnRender();
+
     glClear(GL_COLOR_BUFFER_BIT);
 
     /*используем статическую переменную типа float, которую мы будем по-немного увеличивать каждый вызов функции рендера*/
@@ -58,12 +63,12 @@ static void RenderSceneCB()
     Pipeline p;
     p.Rotate(0.0f, Scale, 0.0f);
     p.WorldPos(0.0f, 0.0f, 3.0f);
-    p.SetCamera(GameCamera.GetPos(), GameCamera.GetTarget(), GameCamera.GetUp());
+    p.SetCamera(pGameCamera->GetPos(), pGameCamera->GetTarget(), pGameCamera->GetUp());
     p.SetPerspectiveProj(60.0f, WINDOW_WIDTH, WINDOW_HEIGHT, 1.0f, 100.0f);
 
     glUniformMatrix4fv(gWVPLocation, 1, GL_TRUE, (const GLfloat*)p.GetTrans());
 
-    glEnableVertexAttribArray(0); //индексируем атрибут вершины
+    glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, VBO); //обратно привязываем буфер, приготавливая его для отрисовки
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); //говорим конвейеру как воспринимать данные внутри буфера
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
@@ -79,15 +84,33 @@ static void RenderSceneCB()
 /*Здесь мы регистрируем новую функцию обратного вызова для получения специальных событий клавиатуры*/
 static void SpecialKeyboardCB(int Key, int x, int y)
 {
-    GameCamera.OnKeyboard(Key);
+    pGameCamera->OnKeyboard(Key);
 }
 
+
+/*При нажатии 'q' мы выходим*/
+static void KeyboardCB(unsigned char Key, int x, int y)
+{
+    switch (Key) {
+    case 'q':
+        exit(0);
+    }
+}
+
+static void PassiveMouseCB(int x, int y)
+{
+    pGameCamera->OnMouse(x, y);
+}
 
 static void InitializeGlutCallbacks()
 {
     glutDisplayFunc(RenderSceneCB);
     glutIdleFunc(RenderSceneCB); //указываем функцию рендера в качестве ленивой
     glutSpecialFunc(SpecialKeyboardCB);
+
+    /*Мы регистрируем 2 новых функции обратного вызова. Одна для мыши и другая для нажатия специальных клавиш*/
+    glutPassiveMotionFunc(PassiveMouseCB);
+    glutKeyboardFunc(KeyboardCB);
 }
 
 static void CreateVertexBuffer()
@@ -121,7 +144,7 @@ static void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum Shad
 {
     GLuint ShaderObj = glCreateShader(ShaderType); //начинаем процесс разработки шейдеров через создание программного объекта
 
-    /*проверяем ошибки*/
+     /*проверяем ошибки*/
     if (ShaderObj == 0) {
         fprintf(stderr, "Error creating shader type %d\n", ShaderType);
         exit(0);
@@ -185,14 +208,20 @@ static void CompileShaders()
 
 int main(int argc, char** argv)
 {
-    glutInit(&argc, argv);  //инициализируем GLUT
+    glutInit(&argc, argv); //инициализируем GLUT
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA); // настраиваем некоторые опции GLUT
-    /*Задаём параметры окна*/
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     glutInitWindowPosition(100, 100);
-    glutCreateWindow("Tutorial 14");
+    glutCreateWindow("Tutorial 15");
 
-    InitializeGlutCallbacks();  //присоединяем функцию RenderSceneCB к GLUT
+    /*Эта функция glut'а разрешает вашему приложению запускаться в полноэкранном режиме, называемом как 'игровой режим'.*/
+    glutGameModeString("1280x1024@32");
+    glutEnterGameMode();
+
+    InitializeGlutCallbacks(); //присоединяем функцию RenderSceneCB к GLUT
+
+    /*Камера теперь автоматически установится в нужное положение*/
+    pGameCamera = new Camera(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     /*Инициализируем GLEW и проверяем на ошибки*/
     GLenum res = glewInit();
